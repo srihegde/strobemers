@@ -22,23 +22,23 @@ IFS=$'\n'       # make newlines the only separator
 # for large outfiles (e.g., files with more than 10M-20M matches as
 # it uses too much memory and becomes slow. 
 
-for k in 30 100 500
-do
-    # mummer MEM
-    /usr/bin/time -l mummer -F -maxmatch -l $k -b  $genome1 $genome2 > tmp.tsv 2> runtime.txt
-    echo -n "MUMmer & MEM & " $k " & " 
-    python genome_mapping_metrics.py tmp.tsv runtime.txt --refs $genome2 --collinear_matches_out coll_sol.tsv
-    # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mem_30_col  coll_sol.tsv &> /dev/null
-    # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mem_30_all  tmp.tsv &> /dev/null
+# for k in 30 100 500
+# do
+#     # mummer MEM
+#     /usr/bin/time -l mummer -F -maxmatch -l $k -b  $genome1 $genome2 > tmp.tsv 2> runtime.txt
+#     echo -n "MUMmer & MEM & " $k " & " 
+#     python genome_mapping_metrics.py tmp.tsv runtime.txt --refs $genome2 --collinear_matches_out coll_sol.tsv
+#     # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mem_30_col  coll_sol.tsv &> /dev/null
+#     # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mem_30_all  tmp.tsv &> /dev/null
 
-    # # mummer MUM
-    /usr/bin/time -l mummer -F -l $k -mum -b $genome1 $genome2 > tmp.tsv 2> runtime.txt
-    echo -n "MUMmer & MUM & " $k " & " 
-    python genome_mapping_metrics.py tmp.tsv runtime.txt --refs $genome2
-    # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mum_30_col  coll_sol.tsv &> /dev/null
-    # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mum_30_all  tmp.tsv &> /dev/null
+#     # # mummer MUM
+#     /usr/bin/time -l mummer -F -l $k -mum -b $genome1 $genome2 > tmp.tsv 2> runtime.txt
+#     echo -n "MUMmer & MUM & " $k " & " 
+#     python genome_mapping_metrics.py tmp.tsv runtime.txt --refs $genome2
+#     # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mum_30_col  coll_sol.tsv &> /dev/null
+#     # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/mummer_mum_30_all  tmp.tsv &> /dev/null
 
-done
+# done
 
 # Strobemap
 /usr/bin/time -l StrobeMap -k 30 -v 31 -c kmers -o tmp.tsv $genome1 $genome2 2> runtime.txt 1> stdout.txt

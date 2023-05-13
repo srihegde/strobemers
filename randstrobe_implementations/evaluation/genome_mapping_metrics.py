@@ -11,8 +11,6 @@ from collections import namedtuple
 
 import RMQT as RMaxQST
 
-import pdb
-
 NAM = namedtuple('NAM', ['x', 'y', 'c', 'd', 'val', 'j', "chr_id"])
 
 

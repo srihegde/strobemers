@@ -16,6 +16,7 @@ except (ImportError, RuntimeError):
 import numpy as np
 import seaborn as sns
 import pandas as pd
+import pdb
 
 def plot_coverage(input_csv, outfolder):
     matplotlib.rcParams.update({'font.size': 16})
@@ -23,8 +24,10 @@ def plot_coverage(input_csv, outfolder):
     indata = pd.read_csv(input_csv,sep='\t')
     # ax = sns.violinplot(x="day", y="total_bill", hue="smoker",
     #                 data=tips, palette="muted")
-    ax = sns.lineplot(x="ref_id", y="coverage", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
-                         data=indata, markers=True)
+    # pdb.set_trace()
+    # ax = sns.lineplot(x="ref_id", y="coverage", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
+    #                      data=indata, markers=True)
+    ax = sns.lineplot(x="ref_id", y="coverage", hue="method", ci = "sd", data=indata, markers=True)
     # ax = sns.violinplot(x="ref_id", y="coverage", hue="method",
     #                       hue_order= ["randstrobes", "kmers"], data=indata)
     plt.xlabel('SIRV')
@@ -34,7 +37,7 @@ def plot_coverage(input_csv, outfolder):
     ax.set_xticklabels(ax.get_xmajorticklabels())
     plt.ylim(0, 1)
     plt.tight_layout()
-    plt.legend(loc='lower right', labels = ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", r'$k$-mers'])
+    # plt.legend(loc='lower right', labels = ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", r'$k$-mers'])
     # ax.set_ylabel("Fraction correct")
     # ax.set_xlabel("Exon size")
     # plt.savefig(os.path.join(outfolder, "plot_coverage.eps"))
@@ -48,8 +51,9 @@ def plot_nr_hits(input_csv, outfolder):
     indata = pd.read_csv(input_csv,sep='\t')
     # ax = sns.barplot(x="ref_id", y="nr_hits", hue="method", data=indata,
     #                       hue_order= ["randstrobes", "kmers"])
-    ax = sns.lineplot(x="ref_id", y="nr_hits", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
-                          data=indata, markers=True)
+    # ax = sns.lineplot(x="ref_id", y="nr_hits", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
+    #                       data=indata, markers=True)
+    ax = sns.lineplot(x="ref_id", y="nr_hits", hue="method", ci = "sd", data=indata, markers=True)
     plt.xlabel('SIRV')
     plt.ylabel('Number NAMs')
     plt.tick_params(rotation=90)
@@ -57,7 +61,7 @@ def plot_nr_hits(input_csv, outfolder):
     ax.set_xticklabels(ax.get_xmajorticklabels())
     # plt.ylim(0, 1)
     plt.tight_layout()
-    plt.legend(loc='upper right', labels = ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", r'$k$-mers'])
+    # plt.legend(loc='upper right', labels = ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", r'$k$-mers'])
     # ax.set_ylabel("Fraction correct")
     # ax.set_xlabel("Exon size")
     # plt.savefig(os.path.join(outfolder, "plot_nr_hits.eps"))
@@ -73,8 +77,9 @@ def plot_normalized_match_length(input_csv, outfolder):
     # ax = sns.barplot(x="ref_id", y="nr_hits", hue="method", data=indata,
     #                       hue_order= ["randstrobes", "kmers"])
     plt.tick_params(axis='x', which='minor', labelsize=7)
-    ax = sns.lineplot(x="ref_id", y="normalized_match_length", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
-                        data=indata, markers=True)
+    # ax = sns.lineplot(x="ref_id", y="normalized_match_length", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
+    #                     data=indata, markers=True)
+    ax = sns.lineplot(x="ref_id", y="normalized_match_length", hue="method", ci = "sd", data=indata, markers=True)
     plt.xlabel('SIRV')
     plt.ylabel('Normalized NAM length')
     plt.tick_params(rotation=90)
@@ -82,7 +87,7 @@ def plot_normalized_match_length(input_csv, outfolder):
     ax.set_xticklabels(ax.get_xmajorticklabels())
     plt.ylim(0, 1)
     plt.tight_layout()
-    plt.legend(loc='upper left', labels = ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", r'$k$-mers'])
+    # plt.legend(loc='upper left', labels = ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", r'$k$-mers'])
     # ax.set_ylabel("Fraction correct")
     # ax.set_xlabel("Exon size")
     # plt.savefig(os.path.join(outfolder, "plot_normalized_match_length.eps"))

@@ -108,6 +108,10 @@ static inline void print_positions(mers_vector &flat_vector, idx_to_acc &acc_map
         l_method = "Liu-Patro-Li";
     } else if (link_func == 6){
         l_method = "Liu-Patro-Li_wyhash";
+    } else if (link_func == 7) {
+        l_method = "Spectral_Min";
+    } else if (link_func == 8) {
+        l_method = "Spectral_Stab";
     }
 
 
@@ -659,6 +663,12 @@ int main (int argc, char *argv[])
                     randstrobes2 = link_2_strobes_sahlin2(w_min, w_max, string_hashes, pos_to_seq_choord, i);
                 } else if (link_func == 4) {
                     randstrobes2 = link_2_strobes_guo_pibri(w_min, w_max, string_hashes, pos_to_seq_choord, i);
+                } else if (link_func == 7) {
+                    // TODO: necessitating a combined hash and link function
+                    randstrobes2 = link_2_strobes_spectral_minimizer(w_min, w_max, string_hashes, pos_to_seq_choord, i);
+                } else if (link_func == 8) {
+                    // TODO: necessitating a combined hash and link function
+                    randstrobes2 = link_2_strobes_spectral_stabilizer(w_min, w_max, string_hashes, pos_to_seq_choord, i);
                 }
                 auto end_link = std::chrono::high_resolution_clock::now();
                 elapsed_link += end_link - start_link;
@@ -739,111 +749,111 @@ int main (int argc, char *argv[])
 
 
 
-//    ///////////////////////////// MAP ///////////////////////////////////////
-//
-//    // Record matching time
-//    auto start_map = std::chrono::high_resolution_clock::now();
-//
-//    //    std::ifstream query_file(reads_filename);
-////    KSeq record;
-//    gzFile fp = gzopen(reads_filename, "r");
-////    auto ks = make_kstream(fp, gzread, mode::in);
-//    auto ks = make_ikstream(fp, gzread);
-//    int n_q_chunk_size = 500000;
-//
-////    std::string line, seq, prev_acc;
-//    std::string seq_rc;
-//    std::string acc = "";
-//    unsigned int q_id = 0;
-//    unsigned int read_cnt = 0;
-//    unsigned int cut_nam_vec_at;
-//    unsigned int cut_nam_rc_vec_at;
-//    mers_vector query_mers; // pos, chr_id, kmer hash value
-//    mers_vector query_mers_rc; // pos, chr_id, kmer hash value
-//
-//    std::ofstream output_file;
-//    output_file.open(output_file_name);
-//    while (ks ) {
-////        ks >> record;
-//         auto records = ks.read(n_q_chunk_size);  // read a chunk of 500000 records
-//        int n_it =  records.size();
-//         std::cout << "Mapping chunk of " << n_it << " query sequences... " << std::endl;
-//        #pragma omp parallel for num_threads(n_threads) shared(read_cnt, output_file, q_id) private(acc,seq_rc, query_mers,query_mers_rc)
-//        for(int i = 0; i < n_it; ++i){
-//            auto record =records[i];
-////            for (auto & record : records){
-//            read_cnt ++;
-//            acc = split_string(record.name);
-//    //        std::cout << acc << std::endl;
-//    //        if (!record.comment.empty()) std::cout << record.comment << std::endl;
-//    //        std::cout << record.seq << std::endl;
-//    //        if (!record.qual.empty()) std::cout << record.qual << std::endl;
-//
-//            if (n == 2 ){
-//                query_mers = seq_to_randstrobes2(n, k, w_min, w_max, record.seq, q_id);
-//                seq_rc = reverse_complement(record.seq);
-//                query_mers_rc = seq_to_randstrobes2(n, k, w_min, w_max, seq_rc, q_id);
+   ///////////////////////////// MAP ///////////////////////////////////////
+
+   // Record matching time
+   auto start_map = std::chrono::high_resolution_clock::now();
+
+   //    std::ifstream query_file(reads_filename);
+//    KSeq record;
+   gzFile fp = gzopen(reads_filename, "r");
+//    auto ks = make_kstream(fp, gzread, mode::in);
+   auto ks = make_ikstream(fp, gzread);
+   int n_q_chunk_size = 500000;
+
+//    std::string line, seq, prev_acc;
+   std::string seq_rc;
+   std::string acc = "";
+   unsigned int q_id = 0;
+   unsigned int read_cnt = 0;
+   unsigned int cut_nam_vec_at;
+   unsigned int cut_nam_rc_vec_at;
+   mers_vector query_mers; // pos, chr_id, kmer hash value
+   mers_vector query_mers_rc; // pos, chr_id, kmer hash value
+
+   std::ofstream output_file;
+   output_file.open(output_file_hits);
+   while (ks ) {
+//        ks >> record;
+        auto records = ks.read(n_q_chunk_size);  // read a chunk of 500000 records
+       int n_it =  records.size();
+        std::cout << "Mapping chunk of " << n_it << " query sequences... " << std::endl;
+       #pragma omp parallel for num_threads(n_threads) shared(read_cnt, output_file, q_id) private(acc,seq_rc, query_mers,query_mers_rc)
+       for(int i = 0; i < n_it; ++i){
+           auto record =records[i];
+//            for (auto & record : records){
+           read_cnt ++;
+           acc = split_string(record.name);
+   //        std::cout << acc << std::endl;
+   //        if (!record.comment.empty()) std::cout << record.comment << std::endl;
+   //        std::cout << record.seq << std::endl;
+   //        if (!record.qual.empty()) std::cout << record.qual << std::endl;
+
+           if (n == 2 ){
+               query_mers = seq_to_randstrobes2(n, k, w_min, w_max, record.seq, q_id);
+               seq_rc = reverse_complement(record.seq);
+               query_mers_rc = seq_to_randstrobes2(n, k, w_min, w_max, seq_rc, q_id);
+           }
+
+           else if (n == 3){
+               query_mers = seq_to_randstrobes3(n, k, w_min, w_max, record.seq, q_id);
+               seq_rc = reverse_complement(record.seq);
+               query_mers_rc = seq_to_randstrobes3(n, k, w_min, w_max, seq_rc, q_id);
+           }
+
+           // Find NAMs
+           std::vector<nam> nams; // (r_id, r_pos_start, r_pos_end, q_pos_start, q_pos_end)
+           std::vector<nam> nams_rc; // (r_id, r_pos_start, r_pos_end, q_pos_start, q_pos_end)
+
+           if (unique) {
+               nams = find_nams_unique(query_mers, all_mers_vector, mers_index, k);
+               nams_rc = find_nams_unique(query_mers_rc, all_mers_vector, mers_index, k);
+           }
+           else {
+               nams = find_nams(query_mers, all_mers_vector, mers_index, k, acc_map, acc, filter_cutoff);
+               nams_rc = find_nams(query_mers_rc, all_mers_vector, mers_index, k, acc_map, acc, filter_cutoff);
+           }
+
+           // Sort on score
+           std::sort(nams.begin(), nams.end(), score);
+           std::sort(nams_rc.begin(), nams_rc.end(), score);
+
+           // Take first L NAMs for output
+           cut_nam_vec_at = (max_lines < nams.size()) ? max_lines : nams.size();
+           std::vector<nam> nams_cut(nams.begin(), nams.begin() + cut_nam_vec_at);
+           cut_nam_rc_vec_at = (max_lines < nams_rc.size()) ? max_lines : nams_rc.size();
+           std::vector<nam> nams_rc_cut(nams_rc.begin(), nams_rc.begin() + cut_nam_rc_vec_at);
+
+           //Sort hits based on start choordinate on query sequence
+           if (!sort_on_score_set) {
+               std::sort(nams_cut.begin(), nams_cut.end(), compareByQueryCoord);
+               std::sort(nams_rc_cut.begin(), nams_rc_cut.end(), compareByQueryCoord);
+           }
+
+           // Output results
+           #pragma omp critical (datawrite)
+           {
+               output_nams(nams, output_file, acc, acc_map, false);
+               output_nams(nams_rc, output_file, acc, acc_map, true);
+           };
+   //        std::cout << "Processed " << read_cnt << "reads. " << std::endl;
+
+//            if (read_cnt % 10000 == 0){
+//                std::cout << "Processed " << read_cnt << "reads. " << std::endl;
 //            }
-//
-//            else if (n == 3){
-//                query_mers = seq_to_randstrobes3(n, k, w_min, w_max, record.seq, q_id);
-//                seq_rc = reverse_complement(record.seq);
-//                query_mers_rc = seq_to_randstrobes3(n, k, w_min, w_max, seq_rc, q_id);
-//            }
-//
-//            // Find NAMs
-//            std::vector<nam> nams; // (r_id, r_pos_start, r_pos_end, q_pos_start, q_pos_end)
-//            std::vector<nam> nams_rc; // (r_id, r_pos_start, r_pos_end, q_pos_start, q_pos_end)
-//
-//            if (unique) {
-//                nams = find_nams_unique(query_mers, all_mers_vector, mers_index, k);
-//                nams_rc = find_nams_unique(query_mers_rc, all_mers_vector, mers_index, k);
-//            }
-//            else {
-//                nams = find_nams(query_mers, all_mers_vector, mers_index, k, acc_map, acc, filter_cutoff);
-//                nams_rc = find_nams(query_mers_rc, all_mers_vector, mers_index, k, acc_map, acc, filter_cutoff);
-//            }
-//
-//            // Sort on score
-//            std::sort(nams.begin(), nams.end(), score);
-//            std::sort(nams_rc.begin(), nams_rc.end(), score);
-//
-//            // Take first L NAMs for output
-//            cut_nam_vec_at = (max_lines < nams.size()) ? max_lines : nams.size();
-//            std::vector<nam> nams_cut(nams.begin(), nams.begin() + cut_nam_vec_at);
-//            cut_nam_rc_vec_at = (max_lines < nams_rc.size()) ? max_lines : nams_rc.size();
-//            std::vector<nam> nams_rc_cut(nams_rc.begin(), nams_rc.begin() + cut_nam_rc_vec_at);
-//
-//            //Sort hits based on start choordinate on query sequence
-//            if (!sort_on_score_set) {
-//                std::sort(nams_cut.begin(), nams_cut.end(), compareByQueryCoord);
-//                std::sort(nams_rc_cut.begin(), nams_rc_cut.end(), compareByQueryCoord);
-//            }
-//
-//            // Output results
-//            #pragma omp critical (datawrite)
-//            {
-//                output_nams(nams, output_file, acc, acc_map, false);
-//                output_nams(nams_rc, output_file, acc, acc_map, true);
-//            };
-//    //        std::cout << "Processed " << read_cnt << "reads. " << std::endl;
-//
-////            if (read_cnt % 10000 == 0){
-////                std::cout << "Processed " << read_cnt << "reads. " << std::endl;
-////            }
-//            q_id ++;
-//        }
-//    }
-//    output_file.close();
-//
-//    gzclose(fp);
-//
-//
-//
-//    // Record mapping end time
-//    auto finish_map = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed_map = finish_map - start_map;
-//    std::cout << "Total time mapping: " << elapsed_map.count() << " s\n" <<  std::endl;
+           q_id ++;
+       }
+   }
+   output_file.close();
+
+   gzclose(fp);
+
+
+
+   // Record mapping end time
+   auto finish_map = std::chrono::high_resolution_clock::now();
+   std::chrono::duration<double> elapsed_map = finish_map - start_map;
+   std::cout << "Total time mapping: " << elapsed_map.count() << " s\n" <<  std::endl;
 
 }
 

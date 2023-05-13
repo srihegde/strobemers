@@ -72,6 +72,12 @@ def main(args):
         normalized_hit_length_file = open( os.path.join(args.outfolder, 'normalized_hit_length.csv'), "a+")
         nr_hits_file = open( os.path.join(args.outfolder, 'nr_hits.csv'), "a+")
 
+    # Write headers
+    coverage_file.write("\t".join([str(x) for x in ["method","read_id", "ref_id", "ref_len", "coverage" ]]) + "\n")
+    normalized_hit_length_file.write("\t".join([str(x) for x in ["method","read_id", "ref_id", "ref_len", "match_len", "normalized_match_length" ]]) + "\n")
+    nr_hits_file.write("\t".join([str(x) for x in ["method","read_id", "ref_id", "ref_len", "nr_hits" ]]) + "\n")
+
+
     for i, line in enumerate(open(args.infile, 'r')):
         if line[0] == ">":
             if i == 0:
