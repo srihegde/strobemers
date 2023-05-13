@@ -44,8 +44,6 @@ TIME_FORMAT="%E real\n%M maxresident"
 /usr/bin/time -f $TIME_FORMAT ./StrobeMap -k 30 -v 31 -c kmers -o tmp.tsv $genome1 $genome2 2> runtime.txt 1> stdout.txt
 echo -n "StrobeMap  & 30 & " 
 python genome_mapping_metrics.py tmp.tsv runtime.txt --refs $genome2 --collinear_matches_out coll_sol.tsv
-
-exit
 # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/kmers_30_col  coll_sol.tsv &> /dev/null
 # mummerplot -postscript -p ~/tmp/STROBEMERS/ecoli_to_ecoli/GR_revision/for_dotplots/figs/kmers_30_all  tmp.tsv &> /dev/null
 
