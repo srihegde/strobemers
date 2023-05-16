@@ -27,7 +27,7 @@ def plot_coverage(input_csv, outfolder):
     # pdb.set_trace()
     # ax = sns.lineplot(x="ref_id", y="coverage", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
     #                      data=indata, markers=True)
-    ax = sns.lineplot(x="ref_id", y="coverage", hue="method", ci = "sd", data=indata, markers=True)
+    ax = sns.lineplot(x="read_id", y="coverage", hue="method", ci = "sd", data=indata, markers=True)
     # ax = sns.violinplot(x="ref_id", y="coverage", hue="method",
     #                       hue_order= ["randstrobes", "kmers"], data=indata)
     plt.xlabel('SIRV')
@@ -53,7 +53,7 @@ def plot_nr_hits(input_csv, outfolder):
     #                       hue_order= ["randstrobes", "kmers"])
     # ax = sns.lineplot(x="ref_id", y="nr_hits", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
     #                       data=indata, markers=True)
-    ax = sns.lineplot(x="ref_id", y="nr_hits", hue="method", ci = "sd", data=indata, markers=True)
+    ax = sns.lineplot(x="read_id", y="nr_hits", hue="method", ci = "sd", data=indata, markers=True)
     plt.xlabel('SIRV')
     plt.ylabel('Number NAMs')
     plt.tick_params(rotation=90)
@@ -79,7 +79,7 @@ def plot_normalized_match_length(input_csv, outfolder):
     plt.tick_params(axis='x', which='minor', labelsize=7)
     # ax = sns.lineplot(x="ref_id", y="normalized_match_length", hue="method", ci = "sd", hue_order= ["randstrobes-(3,10,20,70)", "randstrobes-(2,15,20,70)", "hybridstrobes-(3,10,20,70)", "hybridstrobes-(2,15,20,70)", "minstrobes-(3,10,20,70)", "minstrobes-(2,15,20,70)", "kmers"], 
     #                     data=indata, markers=True)
-    ax = sns.lineplot(x="ref_id", y="normalized_match_length", hue="method", ci = "sd", data=indata, markers=True)
+    ax = sns.lineplot(x="read_id", y="normalized_match_length", hue="method", ci = "sd", data=indata, markers=True)
     plt.xlabel('SIRV')
     plt.ylabel('Normalized NAM length')
     plt.tick_params(rotation=90)

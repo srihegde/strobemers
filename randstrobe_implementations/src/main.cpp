@@ -42,7 +42,7 @@ static inline std::string split_string(std::string str, std::string delimiter = 
 
 }
 
-static uint64_t read_references(std::vector<std::string> &seqs, std::vector<unsigned int> &lengths, idx_to_acc &acc_map, std::string fn)
+static uint64_t read_references(std::vector<std::string> &seqs, std::vector<unsigned int> &lengths, idx_to_acc &acc_map, acc_to_idx &acc_map_to_idx, std::string fn)
 {
     uint64_t total_ref_seq_size = 0;
     std::ifstream file(fn);
@@ -60,7 +60,9 @@ static uint64_t read_references(std::vector<std::string> &seqs, std::vector<unsi
 //                generate_kmers(h, k, seq, ref_index);
             }
 //            acc_map[ref_index] = line.substr(1, line.length() -1); //line;
-            acc_map[ref_index] = line.substr(1, line.find(' ') -1 ); //line;
+            std::string acc = line.substr(1, line.find(' ')-1 ); //line;
+            acc_map[ref_index] = acc;
+            acc_map_to_idx[acc] = ref_index;
             ref_index++;
             seq = "";
         }
@@ -450,6 +452,52 @@ void print_usage() {
 //    std::cerr << "\t-s Split output into one file per thread and forward/reverse complement mappings. \n\t   This option is used to generate format compatible with uLTRA long-read RNA aligner and requires \n\t   option -o to be specified as a folder path to uLTRA output directory, e.g., -o /my/path/to/uLTRA_output/ \n";
 }
 
+mers_vector seq_to_randstrobes2(int k, int hash_func, int link_func, int w_min, int w_max, std::string &seq, unsigned int ref_idx) {
+    mers_vector randstrobes2; // pos, chr_id, kmer hash value
+    std::vector<uint64_t> string_hashes;
+    string_hashes.reserve(seq.length());
+    std::vector<unsigned int> pos_to_seq_choord;
+    pos_to_seq_choord.reserve(seq.length());
+
+    if (link_func == 5) { // method 5 requires combined link and hash
+        string_to_hash_nohash(seq, string_hashes, pos_to_seq_choord, k);
+        randstrobes2 = link_2_strobes_liu_patro_li(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+    } else if (link_func == 6) { // method 6 requires combined link and hash
+        string_to_hash_nohash(seq, string_hashes, pos_to_seq_choord, k);
+        randstrobes2 = link_2_strobes_liu_patro_li_wyhash(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+    } else { // the other methods can be separated
+        // first hash
+        if (hash_func == 1) {
+            string_to_hash_nohash(seq, string_hashes, pos_to_seq_choord, k);
+        } else if (hash_func == 2) {
+            string_to_hash_wang(seq, string_hashes, pos_to_seq_choord, k);
+        } else if (hash_func == 3) {
+            string_to_hash_xxhash(seq, string_hashes, pos_to_seq_choord, k);
+        } else if (hash_func == 4) {
+            string_to_hash_wyhash(seq, string_hashes, pos_to_seq_choord, k);
+        }
+        
+        // then link
+        if (link_func == 1) {
+            randstrobes2 = link_2_strobes_sahlin1(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+        } else if (link_func == 2) {
+            randstrobes2 = link_2_strobes_shen(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+        } else if (link_func == 3) {
+            randstrobes2 = link_2_strobes_sahlin2(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+        } else if (link_func == 4) {
+            randstrobes2 = link_2_strobes_guo_pibri(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+        } else if (link_func == 7) {
+            // TODO: necessitating a combined hash and link function
+            randstrobes2 = link_2_strobes_spectral_minimizer(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+        } else if (link_func == 8) {
+            // TODO: necessitating a combined hash and link function
+            randstrobes2 = link_2_strobes_spectral_stabilizer(w_min, w_max, string_hashes, pos_to_seq_choord, ref_idx);
+        }
+    }
+
+//            std::cout << "Done with ref: " << i << std::endl;
+    return randstrobes2;
+}
 
 // g++ -std=c++11 main.cpp index.cpp -o StrobeMap -O3 -mavx2
 
@@ -569,8 +617,9 @@ int main (int argc, char *argv[])
     std::vector<unsigned int> ref_lengths;
     uint64_t total_ref_seq_size;
     idx_to_acc acc_map;
+    acc_to_idx acc_map_to_idx;
 
-    total_ref_seq_size = read_references(ref_seqs, ref_lengths, acc_map, filename);
+    total_ref_seq_size = read_references(ref_seqs, ref_lengths, acc_map, acc_map_to_idx, filename);
 
     //////////////////////////////////////////////////////
 
@@ -720,7 +769,7 @@ int main (int argc, char *argv[])
     std::ofstream output_file_sampled; // q_position_end (last position) if three strobes;
     output_file_sampled.open(output_filename_sampled);
     print_positions(flat_vector, acc_map, output_file_sampled, hash_func, link_func ); // TODO
-    return 0;
+    // return 0;
 
 
 
@@ -790,28 +839,28 @@ int main (int argc, char *argv[])
    //        if (!record.qual.empty()) std::cout << record.qual << std::endl;
 
            if (n == 2 ){
-               query_mers = seq_to_randstrobes2(n, k, w_min, w_max, record.seq, q_id);
+               query_mers = seq_to_randstrobes2(k, hash_func, link_func, w_min, w_max, record.seq, q_id);
                seq_rc = reverse_complement(record.seq);
-               query_mers_rc = seq_to_randstrobes2(n, k, w_min, w_max, seq_rc, q_id);
+               query_mers_rc = seq_to_randstrobes2(k, hash_func, link_func, w_min, w_max, seq_rc, q_id);
            }
 
-           else if (n == 3){
-               query_mers = seq_to_randstrobes3(n, k, w_min, w_max, record.seq, q_id);
-               seq_rc = reverse_complement(record.seq);
-               query_mers_rc = seq_to_randstrobes3(n, k, w_min, w_max, seq_rc, q_id);
-           }
+        //    else if (n == 3){
+        //        query_mers = seq_to_randstrobes3(n, k, w_min, w_max, record.seq, q_id);
+        //        seq_rc = reverse_complement(record.seq);
+        //        query_mers_rc = seq_to_randstrobes3(n, k, w_min, w_max, seq_rc, q_id);
+        //    }
 
            // Find NAMs
            std::vector<nam> nams; // (r_id, r_pos_start, r_pos_end, q_pos_start, q_pos_end)
            std::vector<nam> nams_rc; // (r_id, r_pos_start, r_pos_end, q_pos_start, q_pos_end)
 
            if (unique) {
-               nams = find_nams_unique(query_mers, all_mers_vector, mers_index, k);
-               nams_rc = find_nams_unique(query_mers_rc, all_mers_vector, mers_index, k);
+               nams = find_nams_unique(query_mers, flat_vector, mers_index, k);
+               nams_rc = find_nams_unique(query_mers_rc, flat_vector, mers_index, k);
            }
            else {
-               nams = find_nams(query_mers, all_mers_vector, mers_index, k, acc_map, acc, filter_cutoff);
-               nams_rc = find_nams(query_mers_rc, all_mers_vector, mers_index, k, acc_map, acc, filter_cutoff);
+               nams = find_nams(query_mers, flat_vector, mers_index, k, acc_map_to_idx, acc, filter_cutoff);
+               nams_rc = find_nams(query_mers_rc, flat_vector, mers_index, k, acc_map_to_idx, acc, filter_cutoff);
            }
 
            // Sort on score
